@@ -24,7 +24,7 @@ def download_model(model, model_zoo_folder):
     model_downloader_options = model_downloader_options.split()
     downloader_cmd = [sys.executable, f"{model_downloader_path}"]
     downloader_cmd = np.concatenate((downloader_cmd, model_downloader_options))
-    # print(downloader_cmd)
+    print(downloader_cmd)
     result = subprocess.run(downloader_cmd, capture_output=True)
     if result.returncode != 0:
         raise RuntimeError(f"Model downloader failed! Error: {result.stderr}")

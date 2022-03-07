@@ -61,6 +61,7 @@ def process_download(reporter, chunk_iterable, size, file):
         reporter.end_progress()
 
 def try_download(reporter, file, num_attempts, start_download, size):
+    print(f"try download {file}")
     for attempt in range(num_attempts):
         if attempt != 0:
             retry_delay = 10
@@ -145,6 +146,8 @@ class DirCache:
 
 def try_retrieve_from_cache(reporter, cache, files):
     try:
+        print(f"try_retrieve_from_cache")
+        print(files)
         if all(cache.has(file[0]) for file in files):
             for hash, destination in files:
                 reporter.print_section_heading('Retrieving {} from the cache', destination)
@@ -164,21 +167,31 @@ def try_update_cache(reporter, cache, hash, source):
         reporter.log_warning('Failed to update the cache', exc_info=True)
 
 def try_retrieve(reporter, name, destination, model_file, cache, num_attempts, start_download):
-    destination.parent.mkdir(parents=True, exist_ok=True)
+    # destination.parent.mkdir(parents=True, exist_ok=True)
 
     if try_retrieve_from_cache(reporter, cache, [[model_file.sha256, destination]]):
         return True
+
+    print("try_retrieve try_retrieve")
 
     reporter.print_section_heading('Downloading {}', destination)
 
     success = False
 
-    with destination.open('w+b') as f:
-        if try_download(reporter, f, num_attempts, start_download, model_file.size):
+    print(destination)
+
+    with destination.open('r+b') as f:
+        print("HJAHAHAH")
+        if True:
             f.seek(0)
             if verify_hash(reporter, f, model_file.sha256, destination, name):
                 try_update_cache(reporter, cache, model_file.sha256, destination)
+                print("Success = true")
                 success = True
+            else:
+                print("hash failed")
+        else:
+            print("failed to DOWNLOAD")
 
     reporter.print()
     return success
@@ -230,6 +243,7 @@ def main():
 
     cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
     models = common.load_models_from_args(parser, args)
+    print(f"models = {models}")
 
     failed_models = set()
 
@@ -260,8 +274,11 @@ def main():
 
                 destination = output / model_file.name
 
+                print(f"destination {destination}")
+
                 if not try_retrieve(model_file_reporter, model.name, destination, model_file, cache, args.num_attempts,
                         lambda: model_file.source.start_download(session, CHUNK_SIZE)):
+                    print("NOT SUCCESSFUL")
                     shutil.rmtree(str(output))
                     failed_models.add(model.name)
                     model_file_reporter.emit_event('model_file_download_end', successful=False)

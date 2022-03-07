@@ -430,6 +430,7 @@ class BlobManager:
             cmx_slices_opt = int(cmx_slices)
 
         outblob_file = blob_file + ".sh" + str(shave_nr) + "cmx" + str(cmx_slices) + "NCE" + str(NCE_nr)
+        print(f"blob file{outblob_file}")
         if(not Path(outblob_file).exists()):
             cli_print("Compiling model for {0} shaves, {1} cmx_slices and {2} NN_engines ".format(str(shave_nr), str(cmx_slices), str(NCE_nr)), PrintColors.RED)
             ret = download_and_compile_NN_model(nn_model, model_zoo_folder, shave_nr_opt, cmx_slices_opt, NCE_nr, outblob_file, model_compilation_target)

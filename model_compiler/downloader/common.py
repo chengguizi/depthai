@@ -198,15 +198,21 @@ class FileSourceGoogleDrive(FileSource):
         return cls(validate_string('"id"', source['id']))
 
     def start_download(self, session, chunk_size):
+
+        print("START DOWNLOAD")
         URL = 'https://docs.google.com/uc?export=download'
         response = session.get(URL, params={'id' : self.id}, stream=True, timeout=DOWNLOAD_TIMEOUT)
         response.raise_for_status()
 
         for key, value in response.cookies.items():
+            print(f"key = {key}, value = {value}")
             if key.startswith('download_warning'):
+                print("good");
                 params = {'id': self.id, 'confirm': value}
                 response = session.get(URL, params=params, stream=True, timeout=DOWNLOAD_TIMEOUT)
                 response.raise_for_status()
+        
+        print("returning")
 
         return response.iter_content(chunk_size=chunk_size)
 
